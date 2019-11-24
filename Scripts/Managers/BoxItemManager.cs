@@ -38,16 +38,17 @@ public class BoxItemManager : MonoBehaviour
     public void OpenBox(Box box) //UnityEventCall
     {
         if (CheckPossibleOpenBox(box))
+        {
             TakeCostFromBox(box);
+            ItemsInBox = Random.Range(box.MinItems, box.MaxItems);
+            BoxItemPresenter.ShowBox(box);
+            SetShowedItems(GetItemsFromBox(box.Items));
+            PlayerDataModel.AddXp(box.XP);
+        }
         else
         {
             ShowNotEnoughWindow(box);
-            return;
         }
-
-        ItemsInBox = Random.Range(box.MinItems, box.MaxItems);
-        BoxItemPresenter.ShowBox(box);
-        SetShowedItems(GetItemsFromBox(box.Items));
     }
     
     private bool CheckPossibleOpenBox(Box box)
@@ -61,7 +62,7 @@ public class BoxItemManager : MonoBehaviour
                 break;
 
             case Box.CostType.Gems:
-                possible = TitlePanelManager.TryTakeCoins(box.Cost);
+                possible = TitlePanelManager.TryTakeGems(box.Cost);
                 break;
 
             case Box.CostType.Free:
@@ -69,7 +70,7 @@ public class BoxItemManager : MonoBehaviour
                 break;
 
             case Box.CostType.ADS:
-                possible = true; //TODO сделать чек доступности рекламы
+                possible = ADSManager.IsRewardedAdReady();
                 break;
         }
 
@@ -92,7 +93,20 @@ public class BoxItemManager : MonoBehaviour
 
     private void ShowNotEnoughWindow(Box box) //TODO реализовать презентер окон
     {
+        switch (box.CostMethod)
+        {
+            case Box.CostType.Coins:
+                WindowsManager.ShowCoinWarn();
+                break;
 
+            case Box.CostType.Gems:
+                WindowsManager.ShowGemsWarn();
+                break;
+
+            case Box.CostType.ADS:
+                WindowsManager.ShowGemsWarn();
+                break;
+        }
     }
 
     private void SetShowedItems(ItemData[] itemDatas)
@@ -107,32 +121,40 @@ public class BoxItemManager : MonoBehaviour
     private float totalChance;
     private ItemData[] GetItemsFromBox(BoxItemData[] boxItemData)
     {
-        List<ItemData> itemsToReturn = new List<ItemData>();
+        List<ItemData> items = new List<ItemData>();
         
         foreach (var item in boxItemData)
         {
             totalChance += item.Chance;
         }
 
-        while (itemsToReturn.Count < ItemsInBox)
+        while (items.Count < ItemsInBox)
         {
             foreach (var item in boxItemData)
             {
-                if (CheckItem(item) && itemsToReturn.Find(x => x.ItemType == item.ItemType).ItemType != item.ItemType)
-                    itemsToReturn.Add(new ItemData(item.ItemType, Random.Range(item.CountMin, item.CountMax)));
+                if (IsGetted(item) && items.Find(x => x.ItemType == item.ItemType).ItemType != item.ItemType)
+                    items.Add(new ItemData(item.ItemType, Random.Range(item.CountMin, item.CountMax), item.ItemType == ItemData.Type.Brawler ? BrawlersManager.GetBrawler() : null));
             }
         }
 
-        return itemsToReturn.ToArray();
+        return items.ToArray();
     }
 
-    private bool CheckItem(BoxItemData boxItemData)
+    private bool IsGetted(BoxItemData boxItemData)
     {
         float randomPoint = Random.value * totalChance;
 
+        if(boxItemData.ItemType == ItemData.Type.Brawler)
+            boxItemData.Chance = GetBrawlerChance();
+        
         if (randomPoint < boxItemData.Chance)
             return true;
         else
             return false;
+    }
+
+    private float GetBrawlerChance()
+    {
+        return BrawlersManager.GetChance();
     }
 }

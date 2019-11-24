@@ -27,7 +27,7 @@ public class BoxItemPresenter : MonoBehaviour
     private void Awake()
     {
         instance = this;
-        graphController = FindObjectOfType<GraphController>();
+        //graphController = FindObjectOfType<GraphController>();
     }
 
     private void Start()
@@ -59,6 +59,7 @@ public class BoxItemPresenter : MonoBehaviour
 
     public static void ShowItem(ItemData itemData)
     {
+
         instance.HideAllItemViews();
 
         switch (itemData.ItemType)
@@ -92,7 +93,8 @@ public class BoxItemPresenter : MonoBehaviour
 
     public static void ShowBox(Box box)
     {
-        //instance.graphController.GoToNodeByName("Open Box");
+        instance.graphController.GoToNodeByName("OpenBox");
+
         instance.BoxImage.sprite = box.BoxSprite;
     }
 

@@ -52,16 +52,19 @@ public class TitlePanelManager : MonoBehaviour
     public static void TakeCoins(int Value)
     {
         if (TryTakeCoins(Value)) PlayerDataModel.TakeCoins(Value);
+        else Debug.LogWarning("Не хватает монет");
     }
 
     public static void TakeGems(int Value)
     {
-        if (TryTakeCoins(Value)) PlayerDataModel.TakeCoins(Value);
+        if (TryTakeCoins(Value)) PlayerDataModel.TakeGems(Value);
+        else Debug.LogWarning("Не хватает гемов");
     }
 
     public static void TakeTickets(int Value)
     {
         if (TryTakeTickets(Value)) PlayerDataModel.TakeTickets(Value);
+        else Debug.LogWarning("Не хватает билетов");
     }
 
 

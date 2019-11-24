@@ -32,7 +32,8 @@ public class TitlePanelPresenter : MonoBehaviour
 
     public static void SetXpValue(int Value)
     {
-        instance.XpProg.SetMax(Value);
+        instance.XpProg.SetValue(PlayerDataModel.GetPreviousLevelXP());
+        instance.XpProg.SetMax(PlayerDataModel.GetNextLevelXP());
         instance.XpProg.SetValue(Value);
     }
 
